@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
-class VariantRequest extends FormRequest
+class ProductRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +14,7 @@ class VariantRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::check();
     }
 
     /**
@@ -24,15 +25,21 @@ class VariantRequest extends FormRequest
     public function rules()
     {
 
+
+        $rules = [
+            'title' => 'required',
+            'description' => 'required',
+            'sku' => 'sometimes',
+            'product_variant' => 'required|array',
+            'product_variant_prices' => 'required|array'
+        ];
+
+        $update = [];
+
         if ($this->method() == 'PUT') {
-            return [
-                'title' => 'required|unique:variants,title,' . $this->route('product_variant')
-            ];
+            $rules = array_merge($rules,$update);
         }
 
-        return [
-            'title' => 'required|unique:variants',
-            'description'
-        ];
+        return $rules;
     }
 }
