@@ -6,7 +6,7 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label for="">Product Name</label>
-                            <input type="text" v-model="product_name" placeholder="Product Name" class="form-control">
+                            <input required type="text" v-model="product_name" placeholder="Product Name" class="form-control">
                         </div>
                         <div class="form-group">
                             <label for="">Product SKU</label>
@@ -14,7 +14,7 @@
                         </div>
                         <div class="form-group">
                             <label for="">Description</label>
-                            <textarea v-model="description" id="" cols="30" rows="4" class="form-control"></textarea>
+                            <textarea required v-model="description" id="" cols="30" rows="4" class="form-control"></textarea>
                         </div>
                     </div>
                 </div>
@@ -109,8 +109,26 @@ export default {
     props: {
         variants: {
             type: Array,
-            required: true
+            required: true,
+            default: []
+        },
+        product: {
+            type: Object,
+            required: false,
+            default: {}
+        },
+        productVariant: {
+            type: Object,
+            required: false,
+            default: {}
+        },
+        productVariantPrices: {
+            type: Object,
+            required: false,
+            default: {}
         }
+
+
     },
     data() {
         return {
@@ -189,13 +207,26 @@ export default {
             }
 
 
-            axios.post('/product', product).then(response => {
-                alert('Successfully Created')
-            }).catch(error => {
-                console.log(error);
-            })
 
-            console.log(product);
+            axios.post('/product', product).then(response => {
+                if(response.status){
+                    alert('Successfully Created')
+                    this.product_name = '';
+                    this.product_sku = '';
+                    this.description = '';
+                    this.images = [];
+                    this.product_variant_prices = [];
+                    this.product_variant = [
+                        {
+                            option: this.variants[0].id,
+                            tags: []
+                        }
+                    ];
+                }
+
+            }).catch(error => {
+                console.error(error);
+            })
         }
 
 

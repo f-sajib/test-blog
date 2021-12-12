@@ -2109,11 +2109,12 @@ __webpack_require__.r(__webpack_exports__);
         product_variant_prices: this.product_variant_prices
       };
       axios.post('/product', product).then(function (response) {
-        console.log(response.data);
+        if (response.status) {
+          alert('Successfully Created');
+        }
       })["catch"](function (error) {
-        console.log(error);
+        console.error(error);
       });
-      console.log(product);
     }
   },
   mounted: function mounted() {
@@ -50490,7 +50491,11 @@ var render = function() {
                   }
                 ],
                 staticClass: "form-control",
-                attrs: { type: "text", placeholder: "Product Name" },
+                attrs: {
+                  required: "",
+                  type: "text",
+                  placeholder: "Product Name"
+                },
                 domProps: { value: _vm.product_name },
                 on: {
                   input: function($event) {
@@ -50542,7 +50547,7 @@ var render = function() {
                   }
                 ],
                 staticClass: "form-control",
-                attrs: { id: "", cols: "30", rows: "4" },
+                attrs: { required: "", id: "", cols: "30", rows: "4" },
                 domProps: { value: _vm.description },
                 on: {
                   input: function($event) {
@@ -63300,8 +63305,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/rifat/Programming/mediusware/interview/interview-question-sr/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/rifat/Programming/mediusware/interview/interview-question-sr/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /home/sajib/Documents/interview-question-sr/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /home/sajib/Documents/interview-question-sr/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
