@@ -222,6 +222,7 @@ export default {
                             tags: []
                         }
                     ];
+                    window.location.href = window.location.origin+'/product';
                 }
 
             }).catch(error => {
