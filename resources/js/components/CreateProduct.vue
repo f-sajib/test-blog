@@ -24,7 +24,11 @@
                         <h6 class="m-0 font-weight-bold text-primary">Media</h6>
                     </div>
                     <div class="card-body border">
-                        <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+                        <vue-dropzone ref="myVueDropzone"
+                                      id="dropzone"
+                                      :options="dropzoneOptions">
+
+                        </vue-dropzone>
                     </div>
                 </div>
             </div>
@@ -115,17 +119,17 @@ export default {
         product: {
             type: Object,
             required: false,
-            default: {}
+            default: () => {}
         },
-        productVariant: {
-            type: Object,
+        productvariant: {
+            type: Array,
             required: false,
-            default: {}
+            default: () => []
         },
-        productVariantPrices: {
-            type: Object,
+        productvariantprices: {
+            type: Array,
             required: false,
-            default: {}
+            default: () => []
         }
 
 
@@ -172,12 +176,11 @@ export default {
             this.product_variant.filter((item) => {
                 tags.push(item.tags);
             })
-
-            this.getCombn(tags).forEach(item => {
+            this.getCombn(tags).forEach((item,i) => {
                 this.product_variant_prices.push({
                     title: item,
-                    price: 0,
-                    stock: 0
+                    price: this.productvariantprices?.length !== 0 ? this.productvariantprices[i]?.price || 0 : 0,
+                    stock: this.productvariantprices?.length !== 0 ? this.productvariantprices[i]?.stock || 0 : 0
                 })
             })
         },
@@ -197,6 +200,7 @@ export default {
 
         // store product into database
         saveProduct() {
+            let hey;
             let product = {
                 title: this.product_name,
                 sku: this.product_sku,
@@ -207,32 +211,75 @@ export default {
             }
 
 
+            if (window.location.pathname.includes('create')) {
+                hey = axios.post('/product', product)
+            } else {
+                hey = axios.put('/product/'+this.product.id, product)
+            }
 
-            axios.post('/product', product).then(response => {
-                if(response.status){
-                    alert('Successfully Created')
-                    this.product_name = '';
-                    this.product_sku = '';
-                    this.description = '';
-                    this.images = [];
-                    this.product_variant_prices = [];
-                    this.product_variant = [
-                        {
-                            option: this.variants[0].id,
-                            tags: []
-                        }
-                    ];
-                }
+            hey.then(response => {
+                // if(response.status){
+                //     alert('Successfully Created')
+                //     this.product_name = '';
+                //     this.product_sku = '';
+                //     this.description = '';
+                //     this.images = [];
+                //     this.product_variant_prices = [];
+                //     this.product_variant = [
+                //         {
+                //             option: this.variants[0].id,
+                //             tags: []
+                //         }
+                //     ];
+                //     window.location.href = window.location.origin+'/product';
+                // }
 
             }).catch(error => {
                 console.error(error);
             })
+        },
+
+        findVariant(value){
+            return value
         }
 
 
     },
     mounted() {
-        console.log('Component mounted.')
+        let product_variant = [];
+
+        this.product_name = this.product?.title;
+        this.product_sku = this.product?.sku;
+        this.description = this.product?.description;
+        if(this.productvariant.length > 0) {
+            this.productvariant.forEach(item => {
+                this.variants.filter(variant => {
+                    if(variant.id === item.variant_id) {
+                        product_variant.push({
+                            option: variant.id,
+                            tags: [item.variant]
+                        })
+                    }
+                });
+            })
+            let variants = []
+            for (let i = 0; i < product_variant.length -1 ; i++) {
+                if(product_variant[i].option === product_variant[i+1].option) {
+                    variants.push({
+                        option: product_variant[i].option,
+                        tags: product_variant[i].tags.concat(product_variant[i+1].tags)
+                    })
+                } else {
+                    variants.push({
+                        option: product_variant[i].option,
+                        tags: product_variant[i].tags
+                    })
+                }
+            }
+            this.product_variant = variants
+        }
+        this.checkVariant()
+
     }
 }
 </script>

@@ -2012,6 +2012,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 
 
@@ -2023,7 +2027,27 @@ __webpack_require__.r(__webpack_exports__);
   props: {
     variants: {
       type: Array,
-      required: true
+      required: true,
+      "default": []
+    },
+    product: {
+      type: Object,
+      required: false,
+      "default": function _default() {}
+    },
+    productvariant: {
+      type: Array,
+      required: false,
+      "default": function _default() {
+        return [];
+      }
+    },
+    productvariantprices: {
+      type: Array,
+      required: false,
+      "default": function _default() {
+        return [];
+      }
     }
   },
   data: function data() {
@@ -2076,11 +2100,13 @@ __webpack_require__.r(__webpack_exports__);
       this.product_variant.filter(function (item) {
         tags.push(item.tags);
       });
-      this.getCombn(tags).forEach(function (item) {
+      this.getCombn(tags).forEach(function (item, i) {
+        var _this$productvariantp, _this$productvariantp2, _this$productvariantp3, _this$productvariantp4;
+
         _this.product_variant_prices.push({
           title: item,
-          price: 0,
-          stock: 0
+          price: ((_this$productvariantp = _this.productvariantprices) === null || _this$productvariantp === void 0 ? void 0 : _this$productvariantp.length) !== 0 ? ((_this$productvariantp2 = _this.productvariantprices[i]) === null || _this$productvariantp2 === void 0 ? void 0 : _this$productvariantp2.price) || 0 : 0,
+          stock: ((_this$productvariantp3 = _this.productvariantprices) === null || _this$productvariantp3 === void 0 ? void 0 : _this$productvariantp3.length) !== 0 ? ((_this$productvariantp4 = _this.productvariantprices[i]) === null || _this$productvariantp4 === void 0 ? void 0 : _this$productvariantp4.stock) || 0 : 0
         });
       });
     },
@@ -2100,6 +2126,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     // store product into database
     saveProduct: function saveProduct() {
+      var hey;
       var product = {
         title: this.product_name,
         sku: this.product_sku,
@@ -2108,17 +2135,78 @@ __webpack_require__.r(__webpack_exports__);
         product_variant: this.product_variant,
         product_variant_prices: this.product_variant_prices
       };
-      axios.post('/product', product).then(function (response) {
-        if (response.status) {
-          alert('Successfully Created');
-        }
+
+      if (window.location.pathname.includes('create')) {
+        hey = axios.post('/product', product);
+      } else {
+        hey = axios.put('/product/' + this.product.id, product);
+      }
+
+      hey.then(function (response) {// if(response.status){
+        //     alert('Successfully Created')
+        //     this.product_name = '';
+        //     this.product_sku = '';
+        //     this.description = '';
+        //     this.images = [];
+        //     this.product_variant_prices = [];
+        //     this.product_variant = [
+        //         {
+        //             option: this.variants[0].id,
+        //             tags: []
+        //         }
+        //     ];
+        //     window.location.href = window.location.origin+'/product';
+        // }
       })["catch"](function (error) {
         console.error(error);
       });
+    },
+    findVariant: function findVariant(value) {
+      return value;
     }
   },
   mounted: function mounted() {
-    console.log('Component mounted.');
+    var _this$product,
+        _this$product2,
+        _this$product3,
+        _this2 = this;
+
+    var product_variant = [];
+    this.product_name = (_this$product = this.product) === null || _this$product === void 0 ? void 0 : _this$product.title;
+    this.product_sku = (_this$product2 = this.product) === null || _this$product2 === void 0 ? void 0 : _this$product2.sku;
+    this.description = (_this$product3 = this.product) === null || _this$product3 === void 0 ? void 0 : _this$product3.description;
+
+    if (this.productvariant.length > 0) {
+      this.productvariant.forEach(function (item) {
+        _this2.variants.filter(function (variant) {
+          if (variant.id === item.variant_id) {
+            product_variant.push({
+              option: variant.id,
+              tags: [item.variant]
+            });
+          }
+        });
+      });
+      var variants = [];
+
+      for (var i = 0; i < product_variant.length - 1; i++) {
+        if (product_variant[i].option === product_variant[i + 1].option) {
+          variants.push({
+            option: product_variant[i].option,
+            tags: product_variant[i].tags.concat(product_variant[i + 1].tags)
+          });
+        } else {
+          variants.push({
+            option: product_variant[i].option,
+            tags: product_variant[i].tags
+          });
+        }
+      }
+
+      this.product_variant = variants;
+    }
+
+    this.checkVariant();
   }
 });
 

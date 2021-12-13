@@ -8,8 +8,8 @@
         <create-product
             :variants="{{ $variants }}"
             :product="{{ $product }}"
-            :productVariant="{{ $productVariant }}"
-            :productVariantPrices="{{ $productVariantPrices }}">
+            :productvariant="{{ $productVariant }}"
+            :productvariantprices="{{ $productVariantPrices }}">
             Loading
         </create-product>
     </div>

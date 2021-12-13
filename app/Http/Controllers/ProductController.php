@@ -91,46 +91,12 @@ class ProductController extends Controller
     {
         $inputs = $request->validated();
 
-
         try {
-            $product_data = array_merge(Arr::only($inputs, ['title', 'description']), [
-                'sku' => $inputs['sku'] ?? Str::slug($inputs['title'])
-            ]);
+            $product = $this->product($inputs);
 
-            $product = Product::query()->create($product_data);
+            $this->productVariant($inputs,$product->id);
 
-            $product_variants = [];
-            $product_variant_prices = [];
-
-            foreach ($inputs['product_variant'] as $value) {
-                foreach ($value['tags'] as $tag) {
-                    array_push($product_variants, [
-                        'variant_id' => $value['option'],
-                        'product_id' => $product->id,
-                        'variant' => $tag,
-                        'created_at' => Carbon::now()->toDateTimeString(),
-                        'updated_at' => Carbon::now()->toDateTimeString()
-                    ]);
-                }
-            }
-
-            $product_variants = ProductVariant::query()->insert($product_variants);
-
-            foreach ($inputs['product_variant_prices'] as $value) {
-                $variants = explode('/', $value['title']);
-                array_push($product_variant_prices, [
-                    'price' => $value['price'],
-                    'stock' => $value['stock'],
-                    'product_variant_one' => ProductVariant::query()->where('variant', $variants[0])->where('product_id',$product->id)->first()->id,
-                    'product_variant_two' => $variants[1] ? ProductVariant::query()->where('variant', $variants[1])->where('product_id',$product->id)->first()->id : null,
-                    'product_variant_three' => $variants[2] ? ProductVariant::query()->where('variant', $variants[2])->where('product_id',$product->id)->first()->id : null,
-                    'product_id' => $product->id,
-                    'created_at' => Carbon::now()->toDateTimeString(),
-                    'updated_at' => Carbon::now()->toDateTimeString()
-                ]);
-            }
-
-            $product_variant_prices = ProductVariantPrice::query()->insert($product_variant_prices);
+            $this->productVariantPrices($inputs,$product->id);
 
             return [
                 'message' => 'Successfully created',
@@ -144,18 +110,6 @@ class ProductController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Models\Product $product
-     * @return \Illuminate\Http\Response
-     */
-    public function show($product)
-    {
-
-    }
-
-
     public function edit(Product $product)
     {
         $variants = Variant::all();
@@ -164,26 +118,65 @@ class ProductController extends Controller
         return view('products.edit', compact('variants','product','productVariant','productVariantPrices'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Product $product
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Product $product)
+
+    public function update(ProductRequest $request, Product $product)
     {
-        //
+        return $request->validated();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param \App\Models\Product $product
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Product $product)
+    private function product($inputs,$create = true)
     {
-        //
+        $product_data = array_merge(Arr::only($inputs, ['title', 'description']), [
+            'sku' => $inputs['sku'] ?? Str::slug($inputs['title'])
+        ]);
+
+        return Product::query()->create($product_data);
+    }
+
+    private function productVariant($inputs, $productId, $create = true)
+    {
+        $product_variants = [];
+        foreach ($inputs['product_variant'] as $value) {
+            foreach ($value['tags'] as $tag) {
+                array_push($product_variants, [
+                    'variant_id' => $value['option'],
+                    'product_id' => $productId,
+                    'variant' => $tag,
+                    'created_at' => Carbon::now()->toDateTimeString(),
+                    'updated_at' => Carbon::now()->toDateTimeString()
+                ]);
+            }
+        }
+
+        return ProductVariant::query()->insert($product_variants);
+    }
+
+    private function productVariantPrices($inputs, $productId, $create = true)
+    {
+        $product_variant_prices = [];
+        $variants = [];
+
+        foreach ($inputs['product_variant_prices'] as $value) {
+            $variant_price = explode('/', $value['title']);
+
+            foreach ($variant_price as $value2) {
+                $data =  ProductVariant::query()
+                    ->where('variant', $value2)
+                    ->where('product_id',$productId)->first();
+                array_push($variants,[$data ? $data->id : null]);
+            }
+
+            array_push($product_variant_prices, [
+                'price' => $value['price'],
+                'stock' => $value['stock'],
+                'product_variant_one' => $variants[0][0],
+                'product_variant_two' => $variants[1][0],
+                'product_variant_three' => $variants[2][0],
+                'product_id' => $productId,
+                'created_at' => Carbon::now()->toDateTimeString(),
+                'updated_at' => Carbon::now()->toDateTimeString()
+            ]);
+        }
+        return ProductVariantPrice::query()->insert($product_variant_prices);
     }
 }
