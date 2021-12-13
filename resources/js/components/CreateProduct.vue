@@ -200,7 +200,7 @@ export default {
 
         // store product into database
         saveProduct() {
-            let hey;
+            let httpCall;
             let product = {
                 title: this.product_name,
                 sku: this.product_sku,
@@ -212,27 +212,27 @@ export default {
 
 
             if (window.location.pathname.includes('create')) {
-                hey = axios.post('/product', product)
+                httpCall = axios.post('/product', product)
             } else {
-                hey = axios.put('/product/'+this.product.id, product)
+                httpCall = axios.put('/product/'+this.product.id, product)
             }
 
-            hey.then(response => {
-                // if(response.status){
-                //     alert('Successfully Created')
-                //     this.product_name = '';
-                //     this.product_sku = '';
-                //     this.description = '';
-                //     this.images = [];
-                //     this.product_variant_prices = [];
-                //     this.product_variant = [
-                //         {
-                //             option: this.variants[0].id,
-                //             tags: []
-                //         }
-                //     ];
-                //     window.location.href = window.location.origin+'/product';
-                // }
+            httpCall.then(response => {
+                if(response.status){
+                    alert('Successfully Created')
+                    this.product_name = '';
+                    this.product_sku = '';
+                    this.description = '';
+                    this.images = [];
+                    this.product_variant_prices = [];
+                    this.product_variant = [
+                        {
+                            option: this.variants[0].id,
+                            tags: []
+                        }
+                    ];
+                    window.location.href = window.location.origin+'/product';
+                }
 
             }).catch(error => {
                 console.error(error);
@@ -279,7 +279,6 @@ export default {
             this.product_variant = variants
         }
         this.checkVariant()
-
     }
 }
 </script>

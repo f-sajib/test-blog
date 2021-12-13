@@ -2126,7 +2126,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     // store product into database
     saveProduct: function saveProduct() {
-      var hey;
+      var _this2 = this;
+
+      var httpCall;
       var product = {
         title: this.product_name,
         sku: this.product_sku,
@@ -2137,26 +2139,25 @@ __webpack_require__.r(__webpack_exports__);
       };
 
       if (window.location.pathname.includes('create')) {
-        hey = axios.post('/product', product);
+        httpCall = axios.post('/product', product);
       } else {
-        hey = axios.put('/product/' + this.product.id, product);
+        httpCall = axios.put('/product/' + this.product.id, product);
       }
 
-      hey.then(function (response) {// if(response.status){
-        //     alert('Successfully Created')
-        //     this.product_name = '';
-        //     this.product_sku = '';
-        //     this.description = '';
-        //     this.images = [];
-        //     this.product_variant_prices = [];
-        //     this.product_variant = [
-        //         {
-        //             option: this.variants[0].id,
-        //             tags: []
-        //         }
-        //     ];
-        //     window.location.href = window.location.origin+'/product';
-        // }
+      httpCall.then(function (response) {
+        if (response.status) {
+          alert('Successfully Created');
+          _this2.product_name = '';
+          _this2.product_sku = '';
+          _this2.description = '';
+          _this2.images = [];
+          _this2.product_variant_prices = [];
+          _this2.product_variant = [{
+            option: _this2.variants[0].id,
+            tags: []
+          }];
+          window.location.href = window.location.origin + '/product';
+        }
       })["catch"](function (error) {
         console.error(error);
       });
@@ -2169,7 +2170,7 @@ __webpack_require__.r(__webpack_exports__);
     var _this$product,
         _this$product2,
         _this$product3,
-        _this2 = this;
+        _this3 = this;
 
     var product_variant = [];
     this.product_name = (_this$product = this.product) === null || _this$product === void 0 ? void 0 : _this$product.title;
@@ -2178,7 +2179,7 @@ __webpack_require__.r(__webpack_exports__);
 
     if (this.productvariant.length > 0) {
       this.productvariant.forEach(function (item) {
-        _this2.variants.filter(function (variant) {
+        _this3.variants.filter(function (variant) {
           if (variant.id === item.variant_id) {
             product_variant.push({
               option: variant.id,
